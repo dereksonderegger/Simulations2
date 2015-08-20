@@ -7,7 +7,11 @@ prep.sims <- function( sim.function, param.matrix,
 	# create the sim_directory if necessary
 	if( !file.exists(sim.directory) ){ 
  		dir.create(sim.directory)
+	}  
+	if( !file.exists(paste(sim.directory,'/InputFiles',sep='')) ){
 	  dir.create(paste(sim.directory,'/InputFiles', sep=''))
+	}
+	if( !file.exists(paste(sim.directory,'/OutputFiles',sep='')) ){
 	  dir.create(paste(sim.directory,'/OutputFiles',sep=''))
 	}
 

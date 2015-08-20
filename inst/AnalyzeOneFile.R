@@ -7,8 +7,8 @@ Input.File  <- args[1]
 load(Input.File)
 
 if( !file.exists(Output.File) ){
-   sim <- do.call(what = Sim.Function, 
-                  args = lapply(Params, identity))
+   sim <- do.call(what = ..Sim.Function, 
+                  args = lapply(..Params, identity))
    save('sim', file=Output.File)
 }
                             

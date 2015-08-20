@@ -19,9 +19,9 @@ prep.sims <- function( sim.function, param.matrix,
 	# a link to the sim.function and param.matrix and save the 
 	# whole she-bang
 	Sim.Env <- globalenv()
-	Sim.Env$Sim.Function <- sim.function
+	Sim.Env$..Sim.Function <- sim.function
 	for( i in 1:num.sims ){
-	  Sim.Env$Params  <- param.matrix[i,]
+	  Sim.Env$..Params  <- param.matrix[i,]
 	  for(j in 1:num.reps){
 	    Sim.Env$Output.File <- paste(sim.directory,'/OutputFiles/sim',i,'rep',j,'.RData',sep='')
 	    save(list  = ls(all.names=TRUE, envir=Sim.Env),

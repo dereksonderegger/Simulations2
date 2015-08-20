@@ -15,10 +15,12 @@ prep.sims <- function( sim.function, param.matrix,
 	  dir.create(paste(sim.directory,'/OutputFiles',sep=''))
 	}
 
-
+  # record what is in our environment, packages, and local libraries
 	Sim.Env <- globalenv()
-	Sim.Env$..Sim.Function <- sim.function
 	Sim.Env$..LoadedPackages <- (.packages())
+	Sim.Env$..LibPaths       <- .libPaths()
+	
+	Sim.Env$..Sim.Function <- sim.function
 	for( i in 1:num.sims ){
 	  Sim.Env$..Params  <- param.matrix[i,]
 	  for(j in 1:num.reps){

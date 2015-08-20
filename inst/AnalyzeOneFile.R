@@ -5,6 +5,10 @@ args <- commandArgs(TRUE)
 Input.File  <- args[1]
 load(Input.File)
 
+# if there were any local libraries the user had, include them
+# in the library search path.
+.libPaths( .LibPaths, .libPaths())
+
 # load the packages that were loaded when the user called us
 lapply(..LoadedPackages, require, character.only = TRUE)
 

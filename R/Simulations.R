@@ -41,7 +41,7 @@ prep.sims <- function( sim.function, param.matrix,
 	script <- system.file('AnalyzeOneFile.R', package='Simulations2')
 	for(i in 1:num.sims){
 	  for(j in 1:num.reps){
-	    input.file <- paste(sim.directory,'/InputFiles','/sim',i,'rep',j,'.RData',sep='')
+	    input.file <- paste('./InputFiles','/sim',i,'rep',j,'.RData',sep='')
 	    writeLines(paste('Rscript', script, input.file), CommandFile)
 	  }
 	}

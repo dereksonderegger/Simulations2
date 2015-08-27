@@ -63,15 +63,20 @@ prep.sims <- function( sim.function, param.matrix,
 } 
 
 #' @export
-run.sims <- function(sim.directory){
-  files <- list.files(paste(sim.directory,'/InputFiles',sep=''))
-  script <- system.file('AnalyzeOneFile.R', package='Simulations2')
-  foreach(file = files) %dopar% {
-    foo <- system( paste('Rscript ', script, ' ', sim.directory,'/InputFiles/',file, sep='') ) 
+run.sims <- function(sim.directory, SLURM=FALSE){
+  if(!SLURM){
+    files <- list.files(paste(sim.directory,'/InputFiles',sep=''))
+    script <- system.file('AnalyzeOneFile.R', package='Simulations2')
+    foreach(file = files) %dopar% {
+      foo <- system( paste('Rscript ', script, ' ', sim.directory,'/InputFiles/',file, sep='') ) 
+    }
+    return(invisible(TRUE))
   }
-  return(invisible(TRUE))
+  else{
+    setwd(sim.directory)   
+    system('sbatch Driver.sh')
+  }
 }
-
 
   
 

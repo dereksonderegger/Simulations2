@@ -9,40 +9,33 @@ prep.sims <- function( sim.function, param.matrix,
 	if( !file.exists(sim.directory) ){ 
  		dir.create(sim.directory)
 	}  
-	if( !file.exists(paste(sim.directory,'/InputFiles',sep='')) ){
-	  dir.create(paste(sim.directory,'/InputFiles', sep=''))
-	}
 	if( !file.exists(paste(sim.directory,'/OutputFiles',sep='')) ){
 	  dir.create(paste(sim.directory,'/OutputFiles',sep=''))
 	}
-	if( !file.exists(paste(sim.directory,'ConsoleFiles',sep='')) ){
-	  dir.create(paste(sim.directory,'ConsoleFiles',sep=''))
+	if( !file.exists(paste(sim.directory,'/ConsoleFiles',sep='')) ){
+	  dir.create(paste(sim.directory,'/ConsoleFiles',sep=''))
 	}
 
   # record what is in our environment, packages, and local libraries
 	Sim.Env <- globalenv()
 	Sim.Env$..LoadedPackages <- (.packages())
 	Sim.Env$..LibPaths       <- .libPaths()
+	Sim.Env$..Sim.Function   <- sim.function
+	Sim.Env$..Sim.Directory  <- sim.directory
+	Sim.Env$..Params         <- param.matrix
 	
-	Sim.Env$..Sim.Function <- sim.function
-	for( i in 1:num.sims ){
-	  Sim.Env$..Params  <- param.matrix[i,]
-	  for(j in 1:num.reps){
-	    Sim.Env$Output.File <- paste(sim.directory,'/OutputFiles/sim',i,'rep',j,'.RData',sep='')
-	    save(list  = ls(all.names=TRUE, envir=Sim.Env),
-	         file  = paste(sim.directory,'/InputFiles','/sim',i,'rep',j,'.RData',sep=''),
-	         envir = Sim.Env )
-	  }
-	}
+	save(list  = ls(all.names=TRUE, envir=Sim.Env),
+	     file  = paste(sim.directory,'/Env.RData',sep=''),
+	     envir = Sim.Env )
 	
-	# Generate a file that contains one command for each file
+
+	# Generate a file that contains one command for each sim and rep
 	file.create(paste(sim.directory,'/CommandFile.txt',sep=''))
 	CommandFile <- file(paste(sim.directory,'/CommandFile.txt',sep=''), open='a' )
 	script <- system.file('AnalyzeOneFile.R', package='Simulations2')
 	for(i in 1:num.sims){
 	  for(j in 1:num.reps){
-	    input.file <- paste('./InputFiles','/sim',i,'rep',j,'.RData',sep='')
-	    writeLines(paste('Rscript', script, input.file), CommandFile)
+	    writeLines(paste('Rscript', script, 'Env.RData', i, j), CommandFile)
 	  }
 	}
 	close(CommandFile)
@@ -64,17 +57,21 @@ prep.sims <- function( sim.function, param.matrix,
 
 #' @export
 run.sims <- function(sim.directory, SLURM=FALSE){
+  old.dir <- getwd()
+  setwd(sim.directory)   
+  
   if(!SLURM){
-    files <- list.files(paste(sim.directory,'/InputFiles',sep=''))
+    con=file('CommandFile.txt'); lines=readLines(con); close(con)
     script <- system.file('AnalyzeOneFile.R', package='Simulations2')
-    foreach(file = files) %dopar% {
-      foo <- system( paste('Rscript ', script, ' ', sim.directory,'/InputFiles/',file, sep='') ) 
+    foreach(line = lines) %dopar% {
+      foo <- system( line ) 
     }
     return(invisible(TRUE))
   }
   else{
     setwd(sim.directory)   
     system('sbatch Driver.sh')
+    return(invisible(TRUE))
   }
 }
 

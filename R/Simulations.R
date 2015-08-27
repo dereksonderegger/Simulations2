@@ -52,7 +52,7 @@ prep.sims <- function( sim.function, param.matrix,
 	Driver <- file(paste(sim.directory,'/Driver.sh',sep=''), open='a' )
 	writeLines('#!/bin/sh', Driver)
 	writeLines(paste('#SBATCH --job-name=Simulation'), Driver)
-	writeLines(paste('#SBATCH --ouput="',sim.directory,'/ConsoleFiles/Output_%A_%a.txt"',sep=''), Driver)
+	writeLines(paste('#SBATCH --output="',sim.directory,'/ConsoleFiles/Output_%A_%a.txt"',sep=''), Driver)
 	writeLines(paste('#SBATCH --workdir="',sim.directory,'"', sep=''), Driver)
 	writeLines(paste('#SBATCH --array=1-', num.sims*num.reps, sep=''), Driver)
 	writeLines(paste('#SBATCH --time=', Est.Time, sep=''), Driver)

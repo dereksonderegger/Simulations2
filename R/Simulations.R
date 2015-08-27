@@ -1,6 +1,7 @@
 #' @export
 prep.sims <- function( sim.function, param.matrix, 
-                       num.reps=10, sim.directory='sim_directory'){
+                       num.reps=10, sim.directory='sim_directory',
+                       Est.Time='20:00'){
 
 	num.sims <- dim(param.matrix)[1]
 
@@ -13,6 +14,9 @@ prep.sims <- function( sim.function, param.matrix,
 	}
 	if( !file.exists(paste(sim.directory,'/OutputFiles',sep='')) ){
 	  dir.create(paste(sim.directory,'/OutputFiles',sep=''))
+	}
+	if( !file.exists(paste(sim.directory,'ConsoleFiles',sep='')) ){
+	  dir.create(paste(sim.directory,'ConsoleFiles',sep=''))
 	}
 
   # record what is in our environment, packages, and local libraries
@@ -38,10 +42,24 @@ prep.sims <- function( sim.function, param.matrix,
 	for(i in 1:num.sims){
 	  for(j in 1:num.reps){
 	    input.file <- paste(sim.directory,'/InputFiles','/sim',i,'rep',j,'.RData',sep='')
-	    writeLines(paste('Rscript ', script, ' ', input.file), CommandFile)
+	    writeLines(paste('Rscript', script, input.file), CommandFile)
 	  }
 	}
 	close(CommandFile)
+	
+	# Generate a bash shell file that controls the Array
+	file.create(paste(sim.directory,'/Driver.sh',sep=''))
+	Driver <- file(paste(sim.directory,'/Driver.sh',sep=''), open='a' )
+	writeLines('#!/bin/sh', Driver)
+	writeLines(paste('#SBATCH --job-name=Simulation'), Driver)
+	writeLines(paste('#SBATCH --ouput="',sim.directory,'/ConsoleFiles/Output_%A_%a.txt"',sep=''), Driver)
+	writeLines(paste('#SBATCH --workdir="',sim.directory,'"', sep=''), Driver)
+	writeLines(paste('#SBATCH --array=1-', num.sims*num.reps, sep=''), Driver)
+	writeLines(paste('#SBATCH --time=', Est.Time, sep=''), Driver)
+	writeLines(paste('module load R', sep=''), Driver)
+	writeLines(paste('command=$(awk "NR==$SLURM_ARRAY_TASK_ID" CommandFile.txt)', sep=''), Driver)
+	writeLines(paste('srun $command'), Driver)
+	close(Driver)
 } 
 
 #' @export

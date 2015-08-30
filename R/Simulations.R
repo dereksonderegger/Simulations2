@@ -170,7 +170,7 @@ make.RNG.seeds <- function(seed, num.sims, num.reps){
   temp <- runif(1)
   for(i in 1:num.sims){
     for(j in 1:num.reps){
-      foo[[paste('sim',i,'rep',j,sep='')]] <- .Random.seed
+      out[[paste('sim',i,'rep',j,sep='')]] <- .Random.seed
       temp <- runif(1)
     }
   }

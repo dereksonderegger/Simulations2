@@ -16,22 +16,16 @@ prep.sims <- function( sim.function, param.matrix,
 	  dir.create(paste(sim.directory,'/ConsoleFiles',sep=''))
 	}
 
+
   # record what is in our environment, packages, and local libraries
 	Sim.Env <- globalenv()
+	Sim.Env$.lec.Random.seed.table <- .lec.Random.seed.table
 	Sim.Env$..LoadedPackages <- (.packages())
 	Sim.Env$..LibPaths       <- .libPaths()
 	Sim.Env$..Sim.Function   <- sim.function
 	Sim.Env$..Sim.Directory  <- sim.directory
 	Sim.Env$..Params         <- param.matrix
-	
-	# DO NOT save the current random number seed!!!!
-	# (otherwise each simulation has the same random numbers)
-	Sim.Env$.Random.seed <- NULL
-	# We should be doing something intelligent so that
-	# we could set some seed and have each simulation pull
-	# off of and different stream based on that seed, but
-	# for now, it is sufficient to just get different results
-	# in each sim.
+	Sim.Env$..RNG.seeds      <- make.RNG.seeds(.Random.seed, num.sims, num.reps)
 	
 	save(list  = ls(all.names=TRUE, envir=Sim.Env),
 	     file  = paste(sim.directory,'/Env.RData',sep=''),
@@ -132,7 +126,8 @@ run.sims <- function(sim.directory, SLURM=FALSE){
 summarize.sims <- function( summary.function, 
                             Params, sim.directory='./sim_directory', ...){
 
-  files <- as.character( dir(path=sim.directory) )
+  target.dir <- paste(sim.directory, '/OutputFiles', sep='')
+  files <- as.character( dir(path=target.dir ) )
 	files <- data.frame(file = files,
 	                    sim = get.sim.number(files),
 	                    rep = get.rep.number(files))
@@ -142,11 +137,13 @@ summarize.sims <- function( summary.function,
 	for(k in 1:nrow(files)){
 	  i <- files$sim[k]
 	  j <- files$rep[k]
-		load(paste(sim.directory,'/sim',i,'rep',j,'.RData', sep=''))
+		load(paste(target.dir,'/sim',i,'rep',j,'.RData', sep=''))
 		temp1 <- summary.function(sim)
-		temp2 <- cbind( do.call(rbind, replicate(nrow(temp1), Params[i,], simplify = FALSE)),
-		                 temp1 )
-		out[[k]] <- temp2  
+		if(is.vector(temp1)){
+		  out[[k]] <- cbind( do.call(rbind, replicate(length(temp1), Params[i,], simplify=FALSE)), temp1 )
+		}else if( is.matrix(temp1) | is.data.frame(temp1) ){
+		  out[[k]] <- cbind( do.call(rbind, replicate(nrow(temp1),   Params[i,], simplify=FALSE)), temp1 )
+		}
 	}
 	return( rbind_all(out) )
 }
@@ -168,3 +165,15 @@ get.rep.number <- Vectorize(function( file ){
 	return(rep)
 }, USE.NAMES=FALSE)
 		
+
+make.RNG.seeds <- function(seed, num.sims, num.reps){
+  out <- list()
+  temp <- runif(1)
+  for(i in 1:num.sims){
+    for(j in 1:num.reps){
+      foo[[paste('sim',i,'rep',j,sep='')]] <- .Random.seed
+      temp <- runif(1)
+    }
+  }
+  return(out)
+}

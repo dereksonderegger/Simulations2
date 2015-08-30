@@ -1,8 +1,8 @@
 # Read the command line arguments
 args <- commandArgs(TRUE)
 Env  <- args[1]
-sim  <- args[2]
-rep  <- args[3]
+sim  <- as.integer(args[2])
+rep  <- as.integer(args[3])
 
 # load the user's environment
 load(Env)
@@ -16,8 +16,17 @@ if( !file.exists(Output.File) ){
   .libPaths( ..LibPaths )
 
   # load the packages that were loaded when the user called us
-  lapply(..LoadedPackages, require, character.only = TRUE)
-
+  suppressPackageStartupMessages(
+    lapply(..LoadedPackages, require, character.only = TRUE, quietly=TRUE, warn.conflicts=FALSE)
+  )
+  
+  # set up the random number generator
+  #.lec.CurrentStream(paste('sim',sim,'rep',rep, sep=''))
+  set.seed(..RNG.seeds[[paste('sim',sim,'rep',rep)]])
+  # Below is a truly nasty hack...
+  # set.seed(.Random.seed + 10000*sim + rep)
+  
+  # call the user's function
   sim <- do.call(what = ..Sim.Function, 
                  args = lapply(..Params[sim,], identity))
   save('sim', file=Output.File)

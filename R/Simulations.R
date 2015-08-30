@@ -24,6 +24,15 @@ prep.sims <- function( sim.function, param.matrix,
 	Sim.Env$..Sim.Directory  <- sim.directory
 	Sim.Env$..Params         <- param.matrix
 	
+	# DO NOT save the current random number seed!!!!
+	# (otherwise each simulation has the same random numbers)
+	Sim.Env$.Random.seed <- NULL
+	# We should be doing something intelligent so that
+	# we could set some seed and have each simulation pull
+	# off of and different stream based on that seed, but
+	# for now, it is sufficient to just get different results
+	# in each sim.
+	
 	save(list  = ls(all.names=TRUE, envir=Sim.Env),
 	     file  = paste(sim.directory,'/Env.RData',sep=''),
 	     envir = Sim.Env )

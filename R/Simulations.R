@@ -19,7 +19,6 @@ prep.sims <- function( sim.function, param.matrix,
 
   # record what is in our environment, packages, and local libraries
 	Sim.Env <- globalenv()
-	Sim.Env$.lec.Random.seed.table <- .lec.Random.seed.table
 	Sim.Env$..LoadedPackages <- (.packages())
 	Sim.Env$..LibPaths       <- .libPaths()
 	Sim.Env$..Sim.Function   <- sim.function

@@ -21,8 +21,9 @@ if( !file.exists(Output.File) ){
   )
   
   # set up the random number generator
+  #.lec.CreateStream(..RNG.seed.names) 
   #.lec.CurrentStream(paste('sim',sim,'rep',rep, sep=''))
-  set.seed(..RNG.seeds[[paste('sim',sim,'rep',rep)]])
+   set.seed(..RNG.seeds[[paste('sim',sim,'rep',rep)]])
   # Below is a truly nasty hack...
   # set.seed(.Random.seed + 10000*sim + rep)
   

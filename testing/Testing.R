@@ -1,5 +1,5 @@
 library(dplyr)
-library(parallel)
+library(rlecuyer)
 
 user.function <- function(n, mu){
   return(data.frame(xbar = mean( rnorm(n,mean=mu))))

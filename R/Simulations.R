@@ -46,9 +46,12 @@ prep.sims <- function( sim.function, param.matrix,
 	# Merge all the sims together into one command file
 	#   - If the job is huge, SLURM makes me break it into 1000 job chunks
 	#   - If it is small, I want to just have one command file
+	old.wd <- getwd()
+	setwd(sim.directory)
 	call <- paste('cat', paste(paste('CommandFile_', 1:num.sims,'.txt', sep=''), collapse=' '), '> CommandFile.txt')
 	try(system(call))
-	
+  setwd(old.wd)
+  
 	# Generate a bash shell file that controls each Sim array
 	for( i in 1:num.sims){
   	file.create(paste(sim.directory,'/Driver_',i,'.sh',sep=''))

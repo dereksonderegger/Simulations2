@@ -15,7 +15,7 @@ function2 <- function(a,b){
 x <- rnorm(5)
 
 prep.sims(user.function, Params, 
-          num.reps=2, sim.directory='~/Testing')
+          num.reps=4, sim.directory='~/Testing')
 
 run.sims(sim.directory='~/Testing')
 

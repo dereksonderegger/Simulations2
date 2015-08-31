@@ -4,8 +4,15 @@ Env  <- args[1]
 sim  <- as.integer(args[2])
 rep  <- as.integer(args[3])
 
+# Keep track of the sessions random seed
+temp <- runif(1)
+seed <- .Random.seed
+
 # load the user's environment
 load(Env)
+
+# reset the seed to whatever the session had
+set.seed(seed)
 
 # Figure out the appropriate output file location
 Output.File <- paste(..Sim.Directory, '/OutputFiles/sim',sim,'rep',rep,'.RData', sep='')
@@ -21,9 +28,9 @@ if( !file.exists(Output.File) ){
   )
   
   # set up the random number generator
-  #.lec.CreateStream(..RNG.seed.names) 
-  #.lec.CurrentStream(paste('sim',sim,'rep',rep, sep=''))
-   set.seed(..RNG.seeds[[paste('sim',sim,'rep',rep)]])
+  .lec.CreateStream(..RNG.seed.names) 
+  .lec.CurrentStream(paste('sim',sim,'rep',rep, sep=''))
+  # set.seed(..RNG.seeds[[paste('sim',sim,'rep',rep)]])
   # Below is a truly nasty hack...
   # set.seed(.Random.seed + 10000*sim + rep)
   

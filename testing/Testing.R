@@ -5,7 +5,7 @@ user.function <- function(n, mu){
 }
 
 Params <- expand.grid(n  = c(100, 400),
-                      mu = c(0, 10))
+                      mu = c(0, 10, 20))
 
 function2 <- function(a,b){
   return(a^b)
@@ -14,7 +14,7 @@ function2 <- function(a,b){
 x <- rnorm(5)
 
 prep.sims(user.function, Params, 
-          num.reps=4, sim.directory='~/Testing')
+          num.reps=40, sim.directory='~/Testing')
 
 run.sims(sim.directory='~/Testing')
 

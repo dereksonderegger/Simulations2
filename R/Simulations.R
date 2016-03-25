@@ -35,10 +35,10 @@ prep.sims <- function( sim.function, param.matrix,
 	# Generate files that contains one command for rep
 	script <- system.file('AnalyzeOneFile.R', package='Simulations2')
 	for(i in 1:num.sims){
-	  file.create(paste(sim.directory,'/CommandFile_',i,'.txt', sep=''))
-	  CommandFile <- file(paste(sim.directory,'/CommandFile_',i,'.txt',sep=''), open='a' )
+	  file.create(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt', sep=''))
+	  CommandFile <- file(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt',sep=''), open='a' )
 	  for(j in 1:num.reps){
-	    writeLines(paste('Rscript', script, 'Env.RData', i, j), CommandFile)
+	    writeLines(str_c(R.home(),'/Rscript ', script, ' Env.RData ', i,' ',j), CommandFile)
 	  }
 	  close(CommandFile)
 	}
@@ -46,16 +46,16 @@ prep.sims <- function( sim.function, param.matrix,
 	# Merge all the sims together into one command file
 	#   - If the job is huge, SLURM makes me break it into 1000 job chunks
 	#   - If it is small, I want to just have one command file
-	old.wd <- getwd()
-	setwd(sim.directory)
-	call <- paste('cat', paste(paste('CommandFile_', 1:num.sims,'.txt', sep=''), collapse=' '), '> CommandFile.txt')
-	try(system(call))
-  setwd(old.wd)
+# 	old.wd <- getwd()
+# 	setwd(sim.directory)
+# 	call <- paste('cat', paste(paste('CommandFile_', 1:num.sims,'.txt', sep=''), collapse=' '), '> CommandFile.txt')
+# 	try(system(call))
+#   setwd(old.wd)
   
 	# Generate a bash shell file that controls each Sim array
 	for( i in 1:num.sims){
-  	file.create(paste(sim.directory,'/Driver_',i,'.sh',sep=''))
-  	Driver <- file(paste(sim.directory,'/Driver_',i,'.sh',sep=''), open='a' )
+  	file.create(paste(sim.directory,'/ConsoleFiles/Driver_',i,'.sh',sep=''))
+  	Driver <- file(paste(sim.directory,'/ConsoleFiles/Driver_',i,'.sh',sep=''), open='a' )
   	writeLines('#!/bin/sh', Driver)
   	writeLines(paste('#SBATCH --job-name=Simulation'), Driver)
   	writeLines(paste('#SBATCH --output="',sim.directory,'/ConsoleFiles/Output_%A_%a.txt"',sep=''), Driver)
@@ -67,18 +67,18 @@ prep.sims <- function( sim.function, param.matrix,
   	writeLines(paste('srun $command'), Driver)
 	  close(Driver)
 	}
-	file.create(paste(sim.directory,'/Driver.sh',sep=''))
-	Driver <- file(paste(sim.directory,'/Driver.sh',sep=''), open='a' )
-	writeLines('#!/bin/sh', Driver)
-	writeLines(paste('#SBATCH --job-name=Simulation'), Driver)
-	writeLines(paste('#SBATCH --output="',sim.directory,'/ConsoleFiles/Output_%A_%a.txt"',sep=''), Driver)
-	writeLines(paste('#SBATCH --workdir="',sim.directory,'"', sep=''), Driver)
-	writeLines(paste('#SBATCH --array=1-', num.sims*num.reps, sep=''), Driver)
-	writeLines(paste('#SBATCH --time=', Est.Time, sep=''), Driver)
-	writeLines(paste('module load R', sep=''), Driver)
-	writeLines(paste('command=$(awk "NR==$SLURM_ARRAY_TASK_ID" CommandFile.txt)', sep=''), Driver)
-	writeLines(paste('srun $command'), Driver)
-	close(Driver)
+# 	file.create(paste(sim.directory,'/Driver.sh',sep=''))
+# 	Driver <- file(paste(sim.directory,'/Driver.sh',sep=''), open='a' )
+# 	writeLines('#!/bin/sh', Driver)
+# 	writeLines(paste('#SBATCH --job-name=Simulation'), Driver)
+# 	writeLines(paste('#SBATCH --output="',sim.directory,'/ConsoleFiles/Output_%A_%a.txt"',sep=''), Driver)
+# 	writeLines(paste('#SBATCH --workdir="',sim.directory,'"', sep=''), Driver)
+# 	writeLines(paste('#SBATCH --array=1-', num.sims*num.reps, sep=''), Driver)
+# 	writeLines(paste('#SBATCH --time=', Est.Time, sep=''), Driver)
+# 	writeLines(paste('module load R', sep=''), Driver)
+# 	writeLines(paste('command=$(awk "NR==$SLURM_ARRAY_TASK_ID" CommandFile.txt)', sep=''), Driver)
+# 	writeLines(paste('srun $command'), Driver)
+# 	close(Driver)
 } 
 
 #' @export
@@ -87,9 +87,17 @@ run.sims <- function(sim.directory, SLURM=FALSE){
   setwd(sim.directory)   
   
   if(!SLURM){
-    con=file('CommandFile.txt'); lines=readLines(con); close(con)
-    script <- system.file('AnalyzeOneFile.R', package='Simulations2')
-    foreach(line = lines) %dopar% {
+    all.Console.Files <- list.files(str_c(sim.directory,'/ConsoleFiles')) 
+    all.Command.Files <- all.Console.Files[ str_detect(all.Console.Files, fixed('CommandFile'))]
+    all.lines <- NULL
+    for(commandfile in all.Command.Files){
+      con=file(str_c(sim.directory,'/ConsoleFiles/',commandfile)) 
+      lines=readLines(con) 
+      close(con)
+      all.lines <- c(all.lines, lines)
+    }
+#    script <- system.file('AnalyzeOneFile.R', package='Simulations2')
+    foreach(line = all.lines) %dopar% {
       foo <- system( line ) 
     }
     return(invisible(TRUE))
@@ -194,8 +202,8 @@ make.RNG.seeds <- function(seed, num.sims, num.reps){
   set.seed(seed)
   for(i in 1:num.sims){
     for(j in 1:num.reps){
-      out[[paste('sim',i,'rep',j)]] <- .Random.seed
-      temp <- runif(1837436)
+      out[[paste('sim',i,'rep',j,sep='')]] <- .Random.seed
+      temp <- runif(10)
     }
   }
   return(out)

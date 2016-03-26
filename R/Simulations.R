@@ -63,7 +63,7 @@ prep.sims <- function( sim.function, param.matrix,
   	writeLines(paste('#SBATCH --array=1-', num.reps, sep=''), Driver)
   	writeLines(paste('#SBATCH --time=', Est.Time, sep=''), Driver)
   	writeLines(paste('module load R', sep=''), Driver)
-  	writeLines(paste('command=$(awk "NR==$SLURM_ARRAY_TASK_ID" CommandFile_',i,'.txt)', sep=''), Driver)
+  	writeLines(paste('command=$(awk "NR==$SLURM_ARRAY_TASK_ID" ConsoleFiles/CommandFile_',i,'.txt)', sep=''), Driver)
   	writeLines(paste('srun $command'), Driver)
 	  close(Driver)
 	}

@@ -89,6 +89,8 @@ run.sims <- function(sim.directory, SLURM=FALSE){
   if(!SLURM){
     all.Console.Files <- list.files(str_c(sim.directory,'/ConsoleFiles')) 
     all.Command.Files <- all.Console.Files[ str_detect(all.Console.Files, fixed('CommandFile'))]
+    all.Driver.Files  <- all.Console.Files[ str_detect(all.Console.Files, fixed('Driver'))]
+    
     all.lines <- NULL
     for(commandfile in all.Command.Files){
       con=file(str_c(sim.directory,'/ConsoleFiles/',commandfile)) 
@@ -104,7 +106,9 @@ run.sims <- function(sim.directory, SLURM=FALSE){
   }
   else{
     setwd(sim.directory)   
-    system('sbatch Driver.sh')
+    for( driver in all.Driver.Files){
+      system(str_c('sbatch ', driver))
+    }
     return(invisible(TRUE))
   }
 }

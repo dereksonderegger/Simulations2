@@ -38,7 +38,7 @@ prep.sims <- function( sim.function, param.matrix,
 	  file.create(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt', sep=''))
 	  CommandFile <- file(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt',sep=''), open='a' )
 	  for(j in 1:num.reps){
-	    writeLines(str_c(R.home(),'/Rscript ', script, ' Env.RData ', i,' ',j), CommandFile)
+	    writeLines(str_c(R.home('bin'),'/Rscript ', script, ' Env.RData ', i,' ',j), CommandFile)
 	  }
 	  close(CommandFile)
 	}

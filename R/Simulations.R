@@ -107,7 +107,7 @@ run.sims <- function(sim.directory, SLURM=FALSE){
   else{
     setwd(sim.directory)   
     for( driver in all.Driver.Files){
-      system(str_c('sbatch ', driver))
+      system(str_c('sbatch ./ConsolFiles/', driver))
     }
     return(invisible(TRUE))
   }

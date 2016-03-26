@@ -85,12 +85,12 @@ prep.sims <- function( sim.function, param.matrix,
 run.sims <- function(sim.directory, SLURM=FALSE){
   old.dir <- getwd()
   setwd(sim.directory)   
+
+  all.Console.Files <- list.files(str_c(sim.directory,'/ConsoleFiles')) 
+  all.Command.Files <- all.Console.Files[ str_detect(all.Console.Files, fixed('CommandFile'))]
+  all.Driver.Files  <- all.Console.Files[ str_detect(all.Console.Files, fixed('Driver'))]
   
   if(!SLURM){
-    all.Console.Files <- list.files(str_c(sim.directory,'/ConsoleFiles')) 
-    all.Command.Files <- all.Console.Files[ str_detect(all.Console.Files, fixed('CommandFile'))]
-    all.Driver.Files  <- all.Console.Files[ str_detect(all.Console.Files, fixed('Driver'))]
-    
     all.lines <- NULL
     for(commandfile in all.Command.Files){
       con=file(str_c(sim.directory,'/ConsoleFiles/',commandfile)) 

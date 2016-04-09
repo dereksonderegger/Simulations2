@@ -17,7 +17,7 @@ set.seed(seed)
 # Figure out the appropriate output file location
 Output.File <- paste(..Sim.Directory, '/OutputFiles/sim_',sim,'_rep_',rep,'.Rdata', sep='')
 
-#if( !file.exists(Output.File) ){
+if( !file.exists(Output.File) ){
   # if there were any local libraries the user had, include them
   # in the library search path.
   .libPaths( ..LibPaths )
@@ -38,5 +38,5 @@ Output.File <- paste(..Sim.Directory, '/OutputFiles/sim_',sim,'_rep_',rep,'.Rdat
   sim <- do.call(what = ..Sim.Function, 
                  args = lapply(..Params[sim,], identity))
   save('sim', file=Output.File)
-#}
+}
                             

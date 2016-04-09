@@ -15,7 +15,7 @@ load(Env)
 set.seed(seed)
 
 # Figure out the appropriate output file location
-Output.File <- paste(..Sim.Directory, '/OutputFiles/sim',sim,'rep',rep,'.RData', sep='')
+Output.File <- paste(..Sim.Directory, '/OutputFiles/sim_',sim,'_rep_',rep,'.RData', sep='')
 
 if( !file.exists(Output.File) ){
   # if there were any local libraries the user had, include them

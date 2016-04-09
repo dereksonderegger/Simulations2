@@ -33,25 +33,18 @@ prep.sims <- function( sim.function, param.matrix,
 
 
 	# Generate files that contains one command for rep
-	script <- system.file('AnalyzeOneFile.R', package='Simulations2')
+#	script <- system.file('AnalyzeOneFile.R', package='Simulations2')
 	for(i in 1:num.sims){
 	  file.create(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt', sep=''))
 	  CommandFile <- file(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt',sep=''), open='a' )
-	  for(j in 1:num.reps){
+	  missing.reps <- get.missing.reps(paste(sim.directory,'/OutputFiles'), 1:num.sims)
+	  for(j in missing.reps){
 	    writeLines(str_c(R.home('bin'),'/Rscript ', script, ' Env.RData ', i,' ',j), CommandFile)
 	  }
 	  close(CommandFile)
 	}
 	
-	# Merge all the sims together into one command file
-	#   - If the job is huge, SLURM makes me break it into 1000 job chunks
-	#   - If it is small, I want to just have one command file
-# 	old.wd <- getwd()
-# 	setwd(sim.directory)
-# 	call <- paste('cat', paste(paste('CommandFile_', 1:num.sims,'.txt', sep=''), collapse=' '), '> CommandFile.txt')
-# 	try(system(call))
-#   setwd(old.wd)
-  
+
 	# Generate a bash shell file that controls each Sim array
 	for( i in 1:num.sims){
   	file.create(paste(sim.directory,'/ConsoleFiles/Driver_',i,'.sh',sep=''))
@@ -67,18 +60,6 @@ prep.sims <- function( sim.function, param.matrix,
   	writeLines(paste('srun $command'), Driver)
 	  close(Driver)
 	}
-# 	file.create(paste(sim.directory,'/Driver.sh',sep=''))
-# 	Driver <- file(paste(sim.directory,'/Driver.sh',sep=''), open='a' )
-# 	writeLines('#!/bin/sh', Driver)
-# 	writeLines(paste('#SBATCH --job-name=Simulation'), Driver)
-# 	writeLines(paste('#SBATCH --output="',sim.directory,'/OutputFiles/Output_%A_%a.txt"',sep=''), Driver)
-# 	writeLines(paste('#SBATCH --workdir="',sim.directory,'"', sep=''), Driver)
-# 	writeLines(paste('#SBATCH --array=1-', num.sims*num.reps, sep=''), Driver)
-# 	writeLines(paste('#SBATCH --time=', Est.Time, sep=''), Driver)
-# 	writeLines(paste('module load R', sep=''), Driver)
-# 	writeLines(paste('command=$(awk "NR==$SLURM_ARRAY_TASK_ID" CommandFile.txt)', sep=''), Driver)
-# 	writeLines(paste('srun $command'), Driver)
-# 	close(Driver)
 } 
 
 #' @export
@@ -172,7 +153,7 @@ summarize.sims <- function( summary.function,
 	for(k in 1:nrow(files)){
 	  i <- files$sim[k]
 	  j <- files$rep[k]
-		load(paste(target.dir,'/sim',i,'rep',j,'.RData', sep=''))
+		load(paste(target.dir, '/', files$file[k], sep=''))
 		temp1 <- summary.function(sim)
 		if(is.vector(temp1)){
 		  out[[k]] <- cbind( do.call(rbind, replicate(length(temp1), Params[i,], simplify=FALSE)), temp1 )
@@ -184,20 +165,25 @@ summarize.sims <- function( summary.function,
 }
 
 
+get.missing.reps <- function(dir, reps){
+  files <- list.files(dir)
+  calculated <- get.rep.number(files)
+  missing <- reps[ which( !is.element(reps, calculated)) ]
+  return(missing)
+}
 
 get.sim.number <- Vectorize(function( file ){
-	temp <- strsplit(file, 'sim')
-	temp <- strsplit(temp[[1]][2], 'rep')
+	temp <- str_extract_all(file, '[0-9]+')   # get all numbers
 	sim <- as.integer(temp[[1]][1])
-	names(sim) <- NULL
+	rep <- as.integer(temp[[1]][2])
 	return(sim)
 }, USE.NAMES=FALSE)
 
 get.rep.number <- Vectorize(function( file ){
-	temp <- strsplit(file, 'rep')
-	temp <- strsplit(temp[[1]][2], '.RData')
-	rep <- as.integer(temp[[1]][1])
-	return(rep)
+  temp <- str_extract_all(file, '[0-9]+')
+  sim <- as.integer(temp[[1]][1])
+  rep <- as.integer(temp[[1]][2])
+  return(rep)
 }, USE.NAMES=FALSE)
 		
 

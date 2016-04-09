@@ -33,7 +33,7 @@ prep.sims <- function( sim.function, param.matrix,
 
 
 	# Generate files that contains one command for rep
-#	script <- system.file('AnalyzeOneFile.R', package='Simulations2')
+	script <- system.file('AnalyzeOneFile.R', package='Simulations2')
 	for(i in 1:num.sims){
 	  file.create(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt', sep=''))
 	  CommandFile <- file(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt',sep=''), open='a' )

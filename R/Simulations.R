@@ -79,7 +79,7 @@ run.sims <- function(sim.directory, SLURM=FALSE){
       close(con)
       all.lines <- c(all.lines, lines)
     }
-#    script <- system.file('AnalyzeOneFile.R', package='Simulations2')
+    script <- system.file('AnalyzeOneFile.R', package='Simulations2')
     foreach(line = all.lines) %dopar% {
       foo <- system( line ) 
     }
@@ -167,10 +167,14 @@ summarize.sims <- function( summary.function,
 
 get.missing.reps <- function(dir, sim, reps){
   files <- list.files(dir)
-  temp <- str_extract_all(files, '[0-9]+', simplify=TRUE) %>% as.data.frame()
-  colnames(temp) <- c('sim_num','rep_num')
-  present <- temp %>% filter(sim_num == sim) %>% select(rep_num)
-  missing <- reps[ which( !is.element(reps, present$rep_num)) ]
+  if( length(files) == 0 ){
+    missing <- reps
+  }else{
+    temp <- str_extract_all(files, '[0-9]+', simplify=TRUE) %>% as.data.frame()
+    colnames(temp) <- c('sim_num','rep_num')
+    present <- temp %>% filter(sim_num == sim) %>% select(rep_num)
+    missing <- reps[ which( !is.element(reps, present$rep_num)) ]
+  }
   return(missing)
 }
 

@@ -37,7 +37,7 @@ prep.sims <- function( sim.function, param.matrix,
 	for(i in 1:num.sims){
 	  file.create(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt', sep=''))
 	  CommandFile <- file(paste(sim.directory,'/ConsoleFiles/CommandFile_',i,'.txt',sep=''), open='a' )
-	  missing.reps <- get.missing.reps(paste(sim.directory,'/OutputFiles'), i, 1:num.reps)
+	  missing.reps <- get.missing.reps(paste(sim.directory,'/OutputFiles',sep=''), i, 1:num.reps)
 	  for(j in missing.reps){
 	    writeLines(str_c(R.home('bin'),'/Rscript ', script, ' Env.RData ', i,' ',j), CommandFile)
 	  }
@@ -168,9 +168,9 @@ summarize.sims <- function( summary.function,
 get.missing.reps <- function(dir, sim, reps){
   files <- list.files(dir)
   temp <- str_extract_all(files, '[0-9]+', simplify=TRUE) %>% as.data.frame()
-  colnames(temp) <- c('sim','rep')
-  present <- temp %>% filter(sim == sim) %>% select(rep)
-  missing <- reps[ which( !is.element(reps, present$rep)) ]
+  colnames(temp) <- c('sim_num','rep_num')
+  present <- temp %>% filter(sim_num == sim) %>% select(rep_num)
+  missing <- reps[ which( !is.element(reps, present$rep_num)) ]
   return(missing)
 }
 
